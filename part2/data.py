@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as ps
 import matplotlib.pyplot as plt
+from multipledispatch import dispatch
 
 # чтение данных из csv формата по ТЗ
 data = pd.read_csv("/Users/lubovmakareva/Documents/ognp3/part2/Aids2.csv")
@@ -158,6 +159,7 @@ def less30(people):
             quantity += 1
     return quantity
 
+
 # Трекер валидации возраста
 trackFrame = dataFrame.query('age != @str').query('status == @dedIncide')
 
@@ -197,4 +199,64 @@ less30NSW = less30dict['NSW'] = less30(trackFrame.query('state == @nsw')['age'].
 less30QLD = less30dict['QLD'] = less30(trackFrame.query('state == @qld')['age'].astype(int))
 less30VIC = less30dict['VIC'] = less30(trackFrame.query('state == @vic')['age'].astype(int))
 less30Other = less30dict['Other'] = less30(trackFrame.query('state == @other')['age'].astype(int))
-print(get_key(less30dict,max(less30dict.values())))
+print(get_key(less30dict, max(less30dict.values())))
+
+
+# Анализ и диаграмма способов заражения по регионам
+def waysInState(ste):
+    return set(dataFrame.query('state == @ste')['T.categ'])
+
+
+def quentityOf(ste):
+    resDict = {}
+    for ider in categ:
+        resDict[ider] = 0
+    dataList = dataFrame.query('state == @ste')['T.categ']
+    for dat in dataList:
+        resDict[dat] += 1
+    return resDict
+
+
+stat = set(dataFrame['state'])
+categ = set(dataFrame['T.categ'])
+for state in stat:
+    resutl = quentityOf(state)
+    framer = pd.DataFrame({
+        'catg': resutl.keys(),
+        'values': resutl.values()
+    })
+    rimb = framer.plot.barh(x='catg', y='values',title=state)
+
+plt.show()
+# Анализ выживших и умерших пациентов
+@dispatch(object)
+def procent(age):
+    alive = 'A'
+    adead = 'D'
+    aller = dataFrame.query('age <= @age')['age'].shape[0]
+    live = dataFrame.query('age <= @age').query('status == @alive')['age'].shape[0] * 100 / aller
+    death = dataFrame.query('age <= @age').query('status == @adead')['age'].shape[0] * 100 / aller
+    if live > death:
+        print("In group of " + age + " more live")
+    else:
+        print("In group of " + age + " more die")
+    return
+
+
+@dispatch(object, object)
+def procent(minAge, maxAge):
+    alive = 'A'
+    adead = 'D'
+    aller = dataFrame.query('age >= @minAge and age <= @maxAge')['age'].shape[0]
+    live = dataFrame.query('age >= @minAge and age <= @maxAge').query('status == @alive')['age'].shape[0] * 100 / aller
+    death = dataFrame.query('age >= @minAge and age <= @maxAge').query('status == @adead')['age'].shape[0] * 100 / aller
+    if live > death:
+        print("In group of " + minAge + " and " + maxAge + " more live")
+    else:
+        print("In group of " + minAge + " and " + maxAge + " more die")
+    return
+
+
+procent('30')
+procent('31', '54')
+procent('55')
