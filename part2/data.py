@@ -227,7 +227,6 @@ for state in stat:
     })
     rimb = framer.plot.barh(x='catg', y='values',title=state)
 
-plt.show()
 # Анализ выживших и умерших пациентов
 @dispatch(object)
 def procent(age):
