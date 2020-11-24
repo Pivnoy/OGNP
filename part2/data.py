@@ -53,7 +53,7 @@ lines.set_ylabel('Age')
 
 # Задание параметров для plotly
 fig = ps.line(ageArray, title='Death of people high then 14 age')
-fig.update_xaxes(range=(1,2000),title_text='Quantity')
+fig.update_xaxes(range=(1, 2000), title_text='Quantity')
 fig.update_yaxes(title_text='Age')
 # Отрисовка с помощью plotly
 # fig.show()
@@ -63,5 +63,138 @@ fig.update_yaxes(title_text='Age')
 # в возрасте до 30 лет, распределение по региона Австралии
 ausAge = '30'
 str = '---------'
-ausQuery = dataFrame.query('age <= @ausAge and age != @str')[['age','state']]
-print(ausQuery)
+# общее количество по критерию
+# ausQuery = dataFrame.query('age <= @ausAge and age != @str')[['age','state']].shape[0]
+ausQuery = dataFrame.query('age <= @ausAge and age != @str and status == @dedIncide')
+# количество по штатам (NSW,QLD,Other,VIC)
+nsw = 'NSW'
+qld = 'QLD'
+vic = 'VIC'
+other = 'Other'
+quanNSW = ausQuery.query('state == @nsw').shape[0]
+quanQLD = ausQuery.query('state == @qld').shape[0]
+quanVIC = ausQuery.query('state == @vic').shape[0]
+quanOther = ausQuery.query('state == @other').shape[0]
+arr = [quanNSW, quanQLD, quanVIC, quanOther]
+gt = pd.DataFrame({
+    'stateQuntyties': arr
+}, index=['NCW', 'QLD', 'VIC', 'Other'])
+plit = gt.plot.pie(y='stateQuntyties')
+
+# Посчитать средний возраст умерших в датасете
+taskQuery = dataFrame.query('age <= @ausAge and age != @str')
+
+
+def middleOfAge(arr):
+    sum = 0
+    for i in arr:
+        sum += i
+    return sum / len(arr)
+
+
+# Для всей Австралии
+allAustralia = middleOfAge(taskQuery['age'].astype(int))
+# По штатам
+agedNSW = middleOfAge(taskQuery.query('state == @nsw')['age'].astype(int))
+agedQLD = middleOfAge(taskQuery.query('state == @qld')['age'].astype(int))
+agedVIC = middleOfAge(taskQuery.query('state == @vic')['age'].astype(int))
+agedOther = middleOfAge(taskQuery.query('state == @other')['age'].astype(int))
+print("All Australia", allAustralia)
+print("The other states", agedNSW, agedQLD, agedVIC, agedOther)
+
+# Создание фрейма
+agedFrame = pd.DataFrame({
+    'states': ['NCW', 'QLD', 'VIC', 'Other'],
+    'values': [agedNSW, agedQLD, agedVIC, agedOther]
+})
+
+# отрисовка диаграммы
+axel = agedFrame.plot.barh(x='states', y='values')
+
+
+# Определите возраст самого молодого и самого старого пациента в регионе
+def get_key(d, value):
+    for k, v in d.items():
+        if v == value:
+            return k
+
+
+def smallestInRegion(listing):
+    smallest = 1000
+    for age in listing:
+        if age < smallest:
+            smallest = age
+    return smallest
+
+
+def oldestInRegion(listing):
+    oldest = 0
+    for age in listing:
+        if age > oldest:
+            oldest = age
+    return oldest
+
+
+def more55(people):
+    quantity = 0
+    for age in people:
+        if age >= 55:
+            quantity += 1
+    return quantity
+
+
+def more31less54(people):
+    quantity = 0
+    for age in people:
+        if 31 <= age <= 54:
+            quantity += 1
+    return quantity
+
+
+def less30(people):
+    quantity = 0
+    for age in people:
+        if age <= 30:
+            quantity += 1
+    return quantity
+
+# Трекер валидации возраста
+trackFrame = dataFrame.query('age != @str').query('status == @dedIncide')
+
+# Самые маленькие по регионам
+smallNSW = smallestInRegion(trackFrame.query('state == @nsw')['age'].astype(int))
+smallQLD = smallestInRegion(trackFrame.query('state == @qld')['age'].astype(int))
+smallVIC = smallestInRegion(trackFrame.query('state == @vic')['age'].astype(int))
+smallOther = smallestInRegion(trackFrame.query('state == @other')['age'].astype(int))
+print('The smallest in Regions', smallNSW, smallQLD, smallVIC, smallOther)
+
+# Самые старшие по регионам
+oldNSW = oldestInRegion(trackFrame.query('state == @nsw')['age'].astype(int))
+oldQLD = oldestInRegion(trackFrame.query('state == @qld')['age'].astype(int))
+oldVIC = oldestInRegion(trackFrame.query('state == @vic')['age'].astype(int))
+oldOther = oldestInRegion(trackFrame.query('state == @other')['age'].astype(int))
+print('The oldest in Regions', oldNSW, oldQLD, oldVIC, oldOther)
+
+# Регион с наибольшим количеством инфицированных людей старше 55
+more55dict = {}
+more55NSW = more55dict['NSW'] = more55(trackFrame.query('state == @nsw')['age'].astype(int))
+more55QLD = more55dict['QLD'] = more55(trackFrame.query('state == @qld')['age'].astype(int))
+more55VIC = more55dict['VIC'] = more55(trackFrame.query('state == @vic')['age'].astype(int))
+more55Other = more55dict['Other'] = more55(trackFrame.query('state == @other')['age'].astype(int))
+print(get_key(more55dict, max(more55dict.values())))
+
+# Регион с наибольшим количество инфицированных людей от 31 до 54
+more31less54dict = {}
+more31less54NSW = more31less54dict['NSW'] = more31less54(trackFrame.query('state == @nsw')['age'].astype(int))
+more31less54QLD = more31less54dict['QLD'] = more31less54(trackFrame.query('state == @qld')['age'].astype(int))
+more31less54VIC = more31less54dict['VIC'] = more31less54(trackFrame.query('state == @vic')['age'].astype(int))
+more31less54Other = more31less54dict['Other'] = more31less54(trackFrame.query('state == @other')['age'].astype(int))
+print(get_key(more31less54dict, max(more31less54dict.values())))
+
+# Регион с наибольшим количеством инфицированных людей до 30
+less30dict = {}
+less30NSW = less30dict['NSW'] = less30(trackFrame.query('state == @nsw')['age'].astype(int))
+less30QLD = less30dict['QLD'] = less30(trackFrame.query('state == @qld')['age'].astype(int))
+less30VIC = less30dict['VIC'] = less30(trackFrame.query('state == @vic')['age'].astype(int))
+less30Other = less30dict['Other'] = less30(trackFrame.query('state == @other')['age'].astype(int))
+print(get_key(less30dict,max(less30dict.values())))
