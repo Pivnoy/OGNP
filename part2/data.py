@@ -33,7 +33,7 @@ print(womensHalf / allList * 100)
 Alive = 'A'
 Age = '45'
 menQuery = dataFrame.query('status == @Alive').query('age < @Age').shape[0]
-print(menQuery / allList * 100)
+print(menQuery / mensHalf * 100)
 
 # Показать как соотносятся возраст и смертность у пациентов старше 14 лет. Постройте график
 # функции
