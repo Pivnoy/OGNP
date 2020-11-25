@@ -105,12 +105,12 @@ print("The other states", agedNSW, agedQLD, agedVIC, agedOther)
 
 # Создание фрейма
 agedFrame = pd.DataFrame({
-    'states': ['NCW', 'QLD', 'VIC', 'Other'],
+    'aus': [allAustralia, allAustralia,allAustralia,allAustralia],
     'values': [agedNSW, agedQLD, agedVIC, agedOther]
-})
+}, index=['NCW', 'QLD', 'VIC', 'Other'])
 
 # отрисовка диаграммы
-axel = agedFrame.plot.barh(x='states', y='values')
+axel = agedFrame.plot.barh()
 
 
 # Определите возраст самого молодого и самого старого пациента в регионе
@@ -259,3 +259,5 @@ def procent(minAge, maxAge):
 procent('30')
 procent('31', '54')
 procent('55')
+
+plt.show()
