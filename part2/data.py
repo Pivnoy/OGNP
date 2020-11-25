@@ -82,6 +82,11 @@ gt = pd.DataFrame({
 }, index=['NCW', 'QLD', 'VIC', 'Other'])
 plit = gt.plot.pie(y='stateQuntyties')
 
+# Отрисовка при помощи matplotlib
+fig, ax = plt.subplots()
+ax.pie(arr,labels=['NCW', 'QLD', 'VIC', 'Other'])
+ax.axis('equal')
+
 # Посчитать средний возраст умерших в датасете
 taskQuery = dataFrame.query('age <= @ausAge and age != @str')
 
