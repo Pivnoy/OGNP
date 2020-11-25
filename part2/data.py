@@ -57,7 +57,7 @@ fig = ps.line(ageArray, title='Death of people high then 14 age')
 fig.update_xaxes(range=(1, 2000), title_text='Quantity')
 fig.update_yaxes(title_text='Age')
 # Отрисовка с помощью plotly
-# fig.show()
+fig.show()
 
 
 # Построить круговую диаграмму, отражающую процентное соотношение умерших пациентов
