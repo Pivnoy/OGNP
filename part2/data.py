@@ -3,6 +3,8 @@ import plotly.express as ps
 import matplotlib.pyplot as plt
 from multipledispatch import dispatch
 
+str = '---------'
+
 # чтение данных из csv формата по ТЗ
 data = pd.read_csv("/Users/lubovmakareva/Documents/ognp3/part2/Aids2.csv")
 
@@ -39,22 +41,34 @@ print(menQuery / mensHalf * 100)
 # функции
 dedIncide = 'D'
 altQuery = dataFrame.query('status == @dedIncide')['age']
+
 ageArray = []
 for i in altQuery:
     if i != '---------' and int(i) >= 14:
         ageArray.append(int(i))
 ageArray.sort()
+maxAge = max(ageArray)
+new_arr = [0]*100
+for rat in range(15, maxAge + 1):
+    output = 0
+    for j in ageArray:
+        if j == rat:
+            output += 1
+    new_arr[rat] = output
+print(len(new_arr))
 # Задание параметров отрисовки
-ls = pd.Series(ageArray)
-lines = ls.plot.line()
-lines.set_xlabel('Quantity')
-lines.set_ylabel('Age')
+graph = pd.DataFrame({
+    'count': new_arr,
+    'age': range(0, 100)
+})
+graph.plot.line(x='age', y='count')
+
 # Отрисовка с помощью plot
 # plt.show()
 
 # Задание параметров для plotly
-fig = ps.line(ageArray, title='Death of people high then 14 age')
-fig.update_xaxes(range=(1, 2000), title_text='Quantity')
+fig = ps.line(new_arr, title='Death of people high then 14 age')
+fig.update_xaxes(range=(0, 100), title_text='Quantity')
 fig.update_yaxes(title_text='Age')
 # Отрисовка с помощью plotly
 fig.show()
@@ -63,7 +77,7 @@ fig.show()
 # Построить круговую диаграмму, отражающую процентное соотношение умерших пациентов
 # в возрасте до 30 лет, распределение по региона Австралии
 ausAge = '30'
-str = '---------'
+
 # общее количество по критерию
 # ausQuery = dataFrame.query('age <= @ausAge and age != @str')[['age','state']].shape[0]
 ausQuery = dataFrame.query('age <= @ausAge and age != @str and status == @dedIncide')
@@ -84,7 +98,7 @@ plit = gt.plot.pie(y='stateQuntyties')
 
 # Отрисовка при помощи matplotlib
 fig, ax = plt.subplots()
-ax.pie(arr,labels=['NCW', 'QLD', 'VIC', 'Other'])
+ax.pie(arr, labels=['NCW', 'QLD', 'VIC', 'Other'])
 ax.axis('equal')
 
 # Посчитать средний возраст умерших в датасете
@@ -110,7 +124,7 @@ print("The other states", agedNSW, agedQLD, agedVIC, agedOther)
 
 # Создание фрейма
 agedFrame = pd.DataFrame({
-    'aus': [allAustralia, allAustralia,allAustralia,allAustralia],
+    'aus': [allAustralia, allAustralia, allAustralia, allAustralia],
     'values': [agedNSW, agedQLD, agedVIC, agedOther]
 }, index=['NCW', 'QLD', 'VIC', 'Other'])
 
@@ -230,7 +244,8 @@ for state in stat:
         'catg': resutl.keys(),
         'values': resutl.values()
     })
-    rimb = framer.plot.barh(x='catg', y='values',title=state)
+    rimb = framer.plot.barh(x='catg', y='values', title=state)
+
 
 # Анализ выживших и умерших пациентов
 @dispatch(object)
@@ -264,5 +279,5 @@ def procent(minAge, maxAge):
 procent('30')
 procent('31', '54')
 procent('55')
-
+print("Don't have state where live is more then death")
 plt.show()
